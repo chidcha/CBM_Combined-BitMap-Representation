@@ -1,0 +1,15 @@
+The CBM_Combined-BitMap-Representation Team:
+----------------
+Developed at: 1. High Performance Computing and Networking Center (HPCNC), 
+              Kasetsart University, Thailand.
+              http://health-tourism.cpe.ku.ac.th/CBM_Combined-BitMap-Representation
+              
+	      2. Deparment of Computing, Faculty of Science,
+	      Silpakorn University, Thailand.
+	      
+ ----------------
+Main contact:
+		Chantana Chantrapornchai <fengcnc@ku.ac.th>
+
+Main developer:
+		1. Chidchanok Choksuchat <cchoksuchat@hotmail.com>
