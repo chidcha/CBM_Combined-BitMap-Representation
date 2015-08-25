@@ -293,11 +293,10 @@ int main(int argc, char** argv)
 	char uriIdx[3][2];
 
 	//OpenFile
-	//File *bitfilename = new File("I:\\Compress\\swdf_2012_11_28_b.txt");
-	//strcpy(bitfilename , "I:\\Compress\\swdf_2012_11_28_b.txt");
+	
 	if ((f_b = fopen("I:\\Compress\\swdf_2012_11_28_b.txt", "r")) == NULL) { printf("Error : read file b\n"); return 0; }
 	//filesize(argv[2]);
-	if ((f_t = fopen("I:\\Compress\\swdf_2012_11_28_t.txt", "r")) == NULL) { printf("Error : read file t\n"); return 0; }
+	//if ((f_t = fopen("I:\\Compress\\swdf_2012_11_28_t.txt", "r")) == NULL) { printf("Error : read file t\n"); return 0; }
 	//unsigned long chunkSize = 1073741824;
 	unsigned long long currSize = fileSize;
 	long double total_diff2 = 0.0;
@@ -312,8 +311,8 @@ int main(int argc, char** argv)
 	}
 
 	strcpy(uriIdx[0], "11");
-	strcpy(uriIdx[1], "10");
-	strcpy(uriIdx[2], "0");
+	//strcpy(uriIdx[1], "10");
+	//strcpy(uriIdx[2], "0");
 
 
 	//Substring
@@ -327,7 +326,7 @@ int main(int argc, char** argv)
 
 	// copy str pattern to pattern array
 	mb = 0;
-	for (j = 0; j < 3; j++)
+	for (j = 0; j < 1; j++)
 	{
 		pattern_arr[total_pattern] = (char*)malloc((strlen(uriIdx[j]) + 1) * sizeof(char));
 		count_found[total_pattern] = (int *)malloc(2 * sizeof(int));
