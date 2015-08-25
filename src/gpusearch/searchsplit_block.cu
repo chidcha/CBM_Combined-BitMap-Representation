@@ -25,13 +25,13 @@
 #define BLOCK_SIZE 512
 #elif BLOCK_SIZE512
 #define BLOCK_SIZE 512
-#elif CHUNK1M
+#elif BLOCK_SIZE1024
 #define BLOCK_SIZE 1024
 #else
 #define BLOCK_SIZE 128
 #endif
 
-#define BLOCK_SIZE 1014
+//#define BLOCK_SIZE 1014
 #define MAX_THREAD_PER_BLOCK 1014
 long long unsigned total_sub, total_data;
 clock_t t_sub1, t_sub2, t_data1, t_data2;
@@ -65,7 +65,7 @@ __global__ void searchb(char* data, char* pattern, int len_data, int len_substri
 	// int i = threadIdx.x; //for 1 block
 
 	//For all blocks
-	unsigned long k;
+	//unsigned long k;
 	int j, i = blockIdx.x * blockDim.x + threadIdx.x;
 	// *found=-1;
 	const int numThreads = blockDim.x * gridDim.x;
@@ -112,7 +112,9 @@ __global__ void searchb(char* data, char* pattern, int len_data, int len_substri
 // Read in the given data file and hope it doesn't over the memory limits of the machine or that defined by 'DATA_SIZE'
 //
 
-FILE* f_b, *pFile = NULL;
+FILE* f_b = NULL;
+FILE* f_t = NULL;
+FILE*pFile = NULL;
 unsigned long long fileSize = 0;
 
 
@@ -213,19 +215,19 @@ void printDevProp(cudaDeviceProp devProp)
 //	}
 //}
 
-char* readfile(const char* filename) {
-	FILE* f;
-	char* data = (char*)malloc(1181741 * sizeof(char));
-
-	if ((f = fopen(filename, "r")) != NULL) {
-		// read in the entire file and store into memory
-		// hopefully it doesn't exhause the entire RAM on
-		// the machine or defy the limits as defined by DATA_SIZE
-		fscanf(f, "%s", data);
-	}
-	fclose(f);
-	return data;
-}
+//char* readfile(const char* filename) {
+//	FILE* f;
+//	char* data = (char*)malloc(1181741 * sizeof(char));
+//
+//	if ((f = fopen(filename, "r")) != NULL) {
+//		// read in the entire file and store into memory
+//		// hopefully it doesn't exhause the entire RAM on
+//		// the machine or defy the limits as defined by DATA_SIZE
+//		fscanf(f, "%s", data);
+//	}
+//	fclose(f);
+//	return data;
+//}
 
 int main(int argc, char** argv)
 {
@@ -256,8 +258,8 @@ int main(int argc, char** argv)
 			printf("your system does not have a CUDA capable A device\n");
 			return 1;
 		}
-		if (argc > 1)
-			cuda_device = atoi(argv[1]);
+		//if (argc > 1)
+			cuda_device = atoi("0");
 
 		// check if the command-line chosen device ID is within range, exit if not
 		if (cuda_device >= num_devices)
@@ -268,10 +270,10 @@ int main(int argc, char** argv)
 
 		cudaSetDevice(cuda_device);
 
-		if (argc < 4) {
-			printf("Usage: StringmatchingGPU <device_number> <data_file_b> <string_pattern1-..99>\n");
-			return -1;
-		}
+		//if (argc < 4) {
+		//	printf("Usage: StringmatchingGPU <device_number> <data_file_b> <string_pattern1-..99>\n");
+		//	return -1;
+		//}
 	} // end of safe checks
 
 	//Cuda Device 
@@ -287,11 +289,15 @@ int main(int argc, char** argv)
 	// printf(" %s ", deviceProp.name );
 	//  printf(" %d.%d %d ", deviceProp.major, deviceProp.minor, deviceProp.multiProcessorCount);
 
+	//char bitfilename[60];
+	char uriIdx[3][2];
 
 	//OpenFile
-	if ((f_b = fopen(argv[2], "r")) == NULL) { printf("Error : read file\n"); return 0; }
+	//File *bitfilename = new File("I:\\Compress\\swdf_2012_11_28_b.txt");
+	//strcpy(bitfilename , "I:\\Compress\\swdf_2012_11_28_b.txt");
+	if ((f_b = fopen("I:\\Compress\\swdf_2012_11_28_b.txt", "r")) == NULL) { printf("Error : read file b\n"); return 0; }
 	//filesize(argv[2]);
-
+	if ((f_t = fopen("I:\\Compress\\swdf_2012_11_28_t.txt", "r")) == NULL) { printf("Error : read file t\n"); return 0; }
 	//unsigned long chunkSize = 1073741824;
 	unsigned long long currSize = fileSize;
 	long double total_diff2 = 0.0;
@@ -305,9 +311,14 @@ int main(int argc, char** argv)
 		countR++;
 	}
 
+	strcpy(uriIdx[0], "11");
+	strcpy(uriIdx[1], "10");
+	strcpy(uriIdx[2], "0");
+
+
 	//Substring
-	char* subString_b = (char*)malloc((strlen(argv[3]) + 1) * sizeof(char));
-	strcpy(subString_b, argv[3]);
+	char* subString_b = (char*)malloc((strlen(uriIdx[0]) + 1) * sizeof(char));
+	strcpy(subString_b, uriIdx[0]);
 
 
 
@@ -316,13 +327,13 @@ int main(int argc, char** argv)
 
 	// copy str pattern to pattern array
 	mb = 0;
-	for (j = 3; j < argc; j++)
+	for (j = 0; j < 3; j++)
 	{
-		pattern_arr[total_pattern] = (char*)malloc((strlen(argv[j]) + 1) * sizeof(char));
+		pattern_arr[total_pattern] = (char*)malloc((strlen(uriIdx[j]) + 1) * sizeof(char));
 		count_found[total_pattern] = (int *)malloc(2 * sizeof(int));
 		count_found[total_pattern] = 0;
 
-		strcpy(pattern_arr[total_pattern], argv[j]);
+		strcpy(pattern_arr[total_pattern], uriIdx[j]);
 		printf("pattern= %s \n", pattern_arr[total_pattern]);
 		mb = (mb > strlen(pattern_arr[total_pattern]) ? mb : strlen(pattern_arr[total_pattern]));
 
@@ -331,8 +342,8 @@ int main(int argc, char** argv)
 
 	char* mainString_b;
 	char* d_data_b = 0, *data_b;
-	bool* pos = false;
-	bool* d_pos = false;
+	bool* pos = 0;
+	bool* d_pos = 0;
 	//Device's text
 
 
