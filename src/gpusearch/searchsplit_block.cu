@@ -28,7 +28,7 @@
 #elif BLOCK_SIZE1024
 #define BLOCK_SIZE 1024
 #else
-#define BLOCK_SIZE 128
+#define BLOCK_SIZE 32
 #endif
 
 //#define BLOCK_SIZE 1014
@@ -37,7 +37,30 @@ long long unsigned total_sub, total_data;
 clock_t t_sub1, t_sub2, t_data1, t_data2;
 //const unsigned long chunkSize =1073741824;
 //const unsigned long long chunkSize =1073741824LL;
-const unsigned long long chunkSize = (1 << 20);
+//const unsigned long long chunkSize = (1 << 20);
+#ifdef CHUNK2G
+unsigned long long chunkSize = 0x80000000; //2G
+#elif CHUNK3G
+unsigned long long chunkSize = 0xc0000000; //3G
+#elif CHUNK4G
+unsigned long long chunkSize = 0x100000000; //4G
+#elif CHUNK5G
+unsigned long long chunkSize = 0x140000000; //5G
+#elif CHUNK1G
+unsigned long long chunkSize = 0x40000000; //1G
+#elif CHUNK6G
+unsigned long long chunkSize = 0x180000000; //6G
+#elif CHUNK1M
+unsigned long long chunkSize = 0x100000;//1MB
+#elif CHUNK32M
+unsigned long long chunkSize = 0x2000000;//32MB
+#elif CHUNK256M
+unsigned long long chunkSize =0x10000000;//256MB
+#elif CHUNK32KB
+unsigned long long chunkSize = 0x8000;//32KB
+#else
+unsigned long long chunkSize =0x8000000;//128MB
+#endif
 
 //2;
 /* total 1 G PEr card */
@@ -294,7 +317,14 @@ int main(int argc, char** argv)
 
 	//OpenFile
 	
-	if ((f_b = fopen("I:\\Compress\\swdf_2012_11_28_b.txt", "r")) == NULL) { printf("Error : read file b\n"); return 0; }
+//	if ((f_b = fopen("I:\\Compress\\swdf_2012_11_28_b.txt", "r")) == NULL) { printf("Error : read file b\n"); return 0; }
+
+	if ((f_b = fopen("/data/noo/data/compress/freebase10M_b.txt", "r")) == NULL) { printf("Error : read file b\n"); return 0; }
+
+//"/data/noo/data/compress/freebase10M_b.txt"
+//"/data/noo/data/compress/freebase10M_t.txt"
+
+
 	//filesize(argv[2]);
 	//if ((f_t = fopen("I:\\Compress\\swdf_2012_11_28_t.txt", "r")) == NULL) { printf("Error : read file t\n"); return 0; }
 	//unsigned long chunkSize = 1073741824;
@@ -446,8 +476,11 @@ int main(int argc, char** argv)
 
 
 			cudaEventRecord(start_event, 0);
-
-			searchb << <32 * numSMs, 1024 >> >(d_data_b, d_substr_b, nb, strlen(pattern_arr[j]), d_pos, work_per_thread);// , d_finalres);
+			///////////////////////////////////////////////////////////////////////////////////////////////////////
+			//Call kernel
+			///////////////////////////////////////////////////////////////////////////////////////////////////////
+			searchb << <BLOCK_SIZE,1024>> >(d_data_b, d_substr_b, nb, strlen(pattern_arr[j]), d_pos, work_per_thread);
+			
 
 			cudaEventRecord(stop_event, 0);
 			cudaEventSynchronize(stop_event);
