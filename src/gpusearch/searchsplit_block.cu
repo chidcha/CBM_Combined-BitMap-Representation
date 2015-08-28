@@ -74,57 +74,34 @@ int *count_found[MAX];
 int total_pattern;
 long unsigned total_found;
 int TOTAL_THREADS_PER_BLOCK;
-//Do 
-//Test
-//Correction to library
 
-//Declare const mem
-//static __constant__ char d_stringPattern_b[BLOCK_SIZE];
+
 
 int Rround = 0;
 
-//__global__ void searchb(char* data, char* pattern, bool* results, int len_data,int len_substring)
 __global__ void searchb(char* data, char* pattern, int len_data, int len_substring, bool*pos, unsigned long work_size)//, int* results)
 {
 
 	// int i = threadIdx.x; //for 1 block
 
 	//For all blocks
-	//unsigned long k;
 	int j, i = blockIdx.x * blockDim.x + threadIdx.x;
-	// *found=-1;
 	const int numThreads = blockDim.x * gridDim.x;
-	//unsigned int yes = 1;
-	//printf("num Threads %d blockDim.x %d gridDim.x %d \n", numThreads, blockDim.x , gridDim.x);
-	// printf("tid %d \n",threadIdx.x);
 
 	for (; i < len_data; i += numThreads) {
 
-		//if (i + len_substring > len_data) return; 
-
-		// Detect the first matching character
 		if (data[i] == pattern[0]) {
 
-
-			// Loop through next keyword character
 			for (j = 1; i + j < len_data && j<len_substring; j++) {
 				if (data[i + j] != pattern[j])    { //yes = 0; 
 					break; 
 				}
 			}
 
-	//		if (yes == 1) {
-	//			results[i] = yes;
-	//		}
-
 			if (j == len_substring) {
-				// Store the first matching character to the result list
-				//**results[i] = true;
-				//printf("|");
 				pos[i] = true;
-				//results[i] = yes;
 			}
-			else  pos[i] = false;//end if Substring
+			else  pos[i] = false; //end if marking position
 
 
 		}//end if matching
