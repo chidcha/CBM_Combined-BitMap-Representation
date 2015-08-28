@@ -13,6 +13,9 @@
 #include <string.h>
 #include <time.h>
 
+///////////////////////////////////////////////////////////////
+//set block size
+///////////////////////////////////////////////////////////////
 #ifdef BLOCK_SIZE32
 #define BLOCK_SIZE 32
 #elif BLOCK_SIZE64
@@ -31,13 +34,14 @@
 #define BLOCK_SIZE 32
 #endif
 
-//#define BLOCK_SIZE 1014
+
 #define MAX_THREAD_PER_BLOCK 1014
 long long unsigned total_sub, total_data;
 clock_t t_sub1, t_sub2, t_data1, t_data2;
-//const unsigned long chunkSize =1073741824;
-//const unsigned long long chunkSize =1073741824LL;
-//const unsigned long long chunkSize = (1 << 20);
+
+///////////////////////////////////////////////////////////////
+//set chunk size
+///////////////////////////////////////////////////////////////
 #ifdef CHUNK2G
 unsigned long long chunkSize = 0x80000000; //2G
 #elif CHUNK3G
@@ -62,9 +66,7 @@ unsigned long long chunkSize = 0x8000;//32KB
 unsigned long long chunkSize =0x8000000;//128MB
 #endif
 
-//2;
-/* total 1 G PEr card */
-//const unsigned long chunkSize = 600000000;
+
 unsigned long work_per_thread = 100;
 #define MAX 100
 char *pattern_arr[MAX];
