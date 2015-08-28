@@ -110,9 +110,6 @@ __global__ void searchb(char* data, char* pattern, int len_data, int len_substri
 
 }//end of Kernel
 
-//
-// Read in the given data file and hope it doesn't over the memory limits of the machine or that defined by 'DATA_SIZE'
-//
 
 FILE* f_b = NULL;
 FILE* f_t = NULL;
@@ -176,11 +173,6 @@ void checkGpuMem(unsigned long long size)
 	mem = free_m - temp;
 	rana = temp - free_m;
 	printf(" checkGPU mem %lu %lf %ud %lf %lf %i %i %lf\n", free_t, free_m, (unsigned)total_t, total_m, used_m, mem, rana, here1);
-	//printf ( "mem free %d .... %f MB mem \ntotal %d....%f MB mem \nused %f MB\n",free_t,free_m,total_t,total_m,used_m);
-	//printf(" mem free after array %i MB\n",mem);
-	//printf(" negative mem free after array %i MB\n",rana);
-	//printf(" bytes mem free after array %i MB\n",here1);
-
 }
 
 
@@ -209,28 +201,6 @@ void printDevProp(cudaDeviceProp devProp)
 }
 
 
-
-//void print_shifts(int *iptr, int strlen) {
-//	for (unsigned int i = 0; i < strlen; i++) {
-//		if (iptr[i] == 1)
-//			printf("%d\n", i);
-//	}
-//}
-
-//char* readfile(const char* filename) {
-//	FILE* f;
-//	char* data = (char*)malloc(1181741 * sizeof(char));
-//
-//	if ((f = fopen(filename, "r")) != NULL) {
-//		// read in the entire file and store into memory
-//		// hopefully it doesn't exhause the entire RAM on
-//		// the machine or defy the limits as defined by DATA_SIZE
-//		fscanf(f, "%s", data);
-//	}
-//	fclose(f);
-//	return data;
-//}
-
 int main(int argc, char** argv)
 {
 	printf("start\n");
@@ -239,9 +209,6 @@ int main(int argc, char** argv)
 	int mb = 0;           // pattern size bit S
 	int nb = 0;           // number of ints in the bit data set
 	int j, k;
-
-
-	//int increasestep=1;
 
 	//start Timer
 	cudaError_t error;   // capture returned error code
@@ -273,7 +240,7 @@ int main(int argc, char** argv)
 		cudaSetDevice(cuda_device);
 
 		//if (argc < 4) {
-		//	printf("Usage: StringmatchingGPU <device_number> <data_file_b> <string_pattern1-..99>\n");
+		//	printf("Usage: searchsplit_block <device_number> <data_file_b> <string_pattern1-..99>\n");
 		//	return -1;
 		//}
 	} // end of safe checks
@@ -291,31 +258,23 @@ int main(int argc, char** argv)
 	// printf(" %s ", deviceProp.name );
 	//  printf(" %d.%d %d ", deviceProp.major, deviceProp.minor, deviceProp.multiProcessorCount);
 
-	//char bitfilename[60];
+
 	char uriIdx[3][2];
 
 	//OpenFile
-	
+	//Windows
 //	if ((f_b = fopen("I:\\Compress\\swdf_2012_11_28_b.txt", "r")) == NULL) { printf("Error : read file b\n"); return 0; }
-
+	//Linux
 	if ((f_b = fopen("/data/noo/data/compress/freebase10M_b.txt", "r")) == NULL) { printf("Error : read file b\n"); return 0; }
 
-//"/data/noo/data/compress/freebase10M_b.txt"
-//"/data/noo/data/compress/freebase10M_t.txt"
-
-
 	//filesize(argv[2]);
-	//if ((f_t = fopen("I:\\Compress\\swdf_2012_11_28_t.txt", "r")) == NULL) { printf("Error : read file t\n"); return 0; }
-	//unsigned long chunkSize = 1073741824;
+
 	unsigned long long currSize = fileSize;
 	long double total_diff2 = 0.0;
 	long double total_time_data = 0.0, total_time_pat = 0.0, total_time_pos = 0.0;
 
-
-
 	while (currSize>chunkSize){
 		currSize = (unsigned long)(currSize - chunkSize);
-		//printf("\nround |");
 		countR++;
 	}
 
@@ -327,8 +286,6 @@ int main(int argc, char** argv)
 	//Substring
 	char* subString_b = (char*)malloc((strlen(uriIdx[0]) + 1) * sizeof(char));
 	strcpy(subString_b, uriIdx[0]);
-
-
 
 	cudaEventCreate(&start_event);
 	cudaEventCreate(&stop_event);
@@ -377,19 +334,7 @@ int main(int argc, char** argv)
 		printf("couldn't allocate d_data_b\n");
 	cudaMalloc((void**)&d_substr_b, (strlen(subString_b))*sizeof(char));
 
-	
-	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	//char* mainString = readfile(argv[2]);
-	//int*  d_finalres = 0;
-	//int* finalres = (int*)malloc((strlen(mainString))*sizeof(int));
-	//
-	//cudaMalloc((void**)&d_finalres, (strlen(mainString))*sizeof(int));
-	//cudaMemset(d_finalres, 0, sizeof(int)*strlen(mainString));
-	
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	size_t cur_free, cur_total;
-
-
 
 	printf("\n");
 
@@ -397,18 +342,14 @@ int main(int argc, char** argv)
 
 	printf("%ld KB free of total %ld KB\n", cur_free / 1024, cur_total / 1024);
 
-
 	while ((countc = fread(data_b, sizeof(char), (chunkSize + mb - 1), f_b))>0){
-
 
 		mainString_b = data_b;
 		nb = (int)countc / sizeof(char);
 		nb = nb - (mb - 1);
 		printf("size read (byte) %d ", nb);
 
-
 		TOTAL_THREADS_PER_BLOCK = MAX_THREAD_PER_BLOCK;  /**/
-
 
 		dim3 threadsPerBlocks(TOTAL_THREADS_PER_BLOCK, 1);
 		dim3 numBlocks((int)ceil((double)nb / TOTAL_THREADS_PER_BLOCK), 1);
@@ -485,18 +426,8 @@ int main(int argc, char** argv)
 			printf(" cur_found %d  \n", t_f);
 			total_found += t_f;
 
-			//printf("-------------------------------\n");
-			//print_shifts(finalres, strlen(mainString) + 1);
-			//printf("-------------------------------\n");
-			// cleanup
-
-			// cudaMemcpy(pos, d_pos, sizeof(int)*2, cudaMemcpyDeviceToHost) ;
-			//if (pos[0] != -1)
-			//count_found[j]++;
 		}
 		// stop timer
-
-
 
 		//		checkGpuMem(chunkSize);
 
@@ -530,8 +461,6 @@ int main(int argc, char** argv)
 
 
 	//Free Input
-
-	//free(mainString_b);
 	free(data_b);
 
 	cudaFree(d_data_b);
@@ -540,7 +469,6 @@ int main(int argc, char** argv)
 	cudaEventDestroy(start_event);
 	cudaEventDestroy(stop_event);
 
-	//               printf("\npos");
 	free(pos);
 
 	for (j = 0; j < total_pattern; j++)
@@ -548,11 +476,8 @@ int main(int argc, char** argv)
 		free(pattern_arr[j]);
 		free(count_found[j]);
 	}
-	//Close Input File
-	/*cudaFree(d_finalres);
-	free(finalres);*/
 
-	//                printf("\nfclose end");
+
 	fclose(f_b);
 
 	printf("\nEnd");
